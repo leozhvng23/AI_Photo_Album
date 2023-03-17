@@ -12,12 +12,11 @@ import { Client } from "@opensearch-project/opensearch";
 import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
 
 const REGION = "us-east-1";
-
 const s3Client = new S3Client({ region: REGION });
 const rekognitionClient = new RekognitionClient({ region: REGION });
 const opensearchClient = new Client({
   ...AwsSigv4Signer({
-    region: "us-east-1",
+    region: REGION,
     service: "es",
     getCredentials: () => {
       const credentialsProvider = defaultProvider();
@@ -47,7 +46,10 @@ const detectLabelsFromImage = async (bucket, key) => {
 
   const command = new DetectLabelsCommand(params);
   const response = await rekognitionClient.send(command);
-  const labels = response.Labels.map((label) => label.Name);
+  const labels = response.Labels.map((label) =>
+    // lower case and remove spaces
+    label.Name.toLowerCase().replace(" ", "")
+  );
   console.log("Labels: ", labels);
   return labels;
 };
