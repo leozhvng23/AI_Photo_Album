@@ -1,12 +1,16 @@
 // Reference Documentation:
 // https://opensearch.org/docs/2.6/clients/javascript/index/
 // https://docs.aws.amazon.com/lexv2/latest/dg/lambda.html
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-lex-runtime-service/classes/posttextcommand.html
+// https://docs.aws.amazon.com/lexv2/latest/APIReference/API_runtime_RecognizeText.html
 
+import { LexRuntimeV2 } from "@aws-sdk/client-lex-runtime-v2";
 import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { Client } from "@opensearch-project/opensearch";
 import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
 
 const REGION = "us-east-1";
+const lexClient = new LexRuntimeV2({ region: REGION });
 const opensearchClient = new Client({
   ...AwsSigv4Signer({
     region: REGION,
@@ -19,22 +23,25 @@ const opensearchClient = new Client({
   node: "https://search-photos-mxuc7wztqoqaofdypn2ua7t5le.us-east-1.es.amazonaws.com",
 });
 
-/**
- * Retrieves keywords from the input transcript and slots of a Lex event
- * @param {object} event - The Lex event object
- * @returns {Promise<string[]>} A promise that resolves to an array of keywords
- * @throws Error if input transcript is not found in the event
- */
-async function getKeywordsFromLex(event) {
-  const { inputTranscript, bot } = event;
-
-  if (!inputTranscript) {
-    throw new Error("Input transcript not found in the event");
+async function getKeywordsFromLex(searchQuery) {
+  if (!searchQuery) {
+    throw new Error("Search query not provided");
   }
 
-  const slots = event.interpretations[0].intent.slots;
+  const params = {
+    botId: "BVMUUWPFRU",
+    botAliasId: "DNTRSKGKUZ",
+    localeId: "en_US",
+    sessionId: "search-session",
+    text: searchQuery,
+  };
+
+  const response = await lexClient.recognizeText(params);
+  console.log("Lex response:", response);
+  const slots = response.sessionState.intent.slots;
+  console.log("Slots:", slots);
   const keywords = Object.values(slots)
-    .filter((slot) => slot && slot.value) // Filter out null slots and slots with no value property
+    .filter((slot) => slot) // Filter out null slots
     .map((slot) => slot.value.interpretedValue);
   console.log("Keywords:", keywords);
   return keywords;
@@ -99,92 +106,24 @@ const cleanUpKeywords = (keywords) => {
   return keywords.concat(singularKeywords);
 };
 
-/**
- * Closes the current session by returning a Close dialog action and a message
- * @param {object} sessionState - The session state object
- * @param {object} message - The message to return to the user
- * @returns {object} An object containing the updated session state and the message to return to the user
- */
-const close = async (sessionState, message) => {
-  return {
-    sessionState: {
-      ...sessionState,
-      dialogAction: {
-        type: "Close",
-      },
-    },
-    messages: [
-      {
-        contentType: "PlainText",
-        content: message.content,
-      },
-    ],
-  };
-};
-
-/**
- * Returns an ElicitSlot dialog action and a message to elicit a specific slot from the user
- * @param {object} sessionState - The session state object
- * @param {string} intentName - The name of the intent to elicit the slot for
- * @param {object} slots - The slots object for the intent
- * @param {string} slotToElicit - The name of the slot to elicit from the user
- * @param {object} message - The message to return to the user
- * @returns {object} An object containing the updated session state and the message to return to the user
- */
-const elicitSlot = async (sessionState, intentName, slots, slotToElicit, message) => {
-  return {
-    sessionState: {
-      ...sessionState,
-      intent: {
-        ...sessionState.intent,
-        name: intentName,
-        slots: slots,
-      },
-      dialogAction: {
-        type: "ElicitSlot",
-        slotToElicit: slotToElicit,
-      },
-    },
-    messages: [
-      {
-        contentType: "PlainText",
-        content: message.content,
-      },
-    ],
-  };
-};
-
 const handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
-  const currentIntent = event.interpretations[0].intent.name;
-  console.log("Current intent:", currentIntent);
+  const searchQuery = event.q;
 
-  if (currentIntent === "SearchIntent") {
-    try {
-      const keywords = await getKeywordsFromLex(event);
-      if (keywords.length === 0) {
-        return elicitSlot(event.sessionState, "SearchIntent", {}, "Keywords", {
-          contentType: "PlainText",
-          content: "Please provide some keywords to search for photos.",
-        });
-      }
-      const searchResults = await searchPhotos(keywords);
-      return close(event.sessionAttributes, "Fulfilled", {
-        contentType: "PlainText",
-        content: JSON.stringify(searchResults),
-      });
-    } catch (error) {
-      console.error("Error processing the event:", error);
-      return close(event.sessionState, {
-        contentType: "PlainText",
-        content: "Internal server error",
-      });
-    }
+  try {
+    const keywords = await getKeywordsFromLex(searchQuery);
+    const searchResults = await searchPhotos(keywords);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(searchResults),
+    };
+  } catch (error) {
+    console.error("Error processing the event:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
   }
-  return close(event.sessionState, {
-    contentType: "PlainText",
-    content: "Internal server error",
-  });
 };
 
 export { handler };
