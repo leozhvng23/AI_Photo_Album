@@ -23,7 +23,7 @@ const opensearchClient = new Client({
   }),
   node: "https://search-photos-mxuc7wztqoqaofdypn2ua7t5le.us-east-1.es.amazonaws.com",
 });
-const customWords = ["pants", "metropolis"];
+const customWords = ["pants", "metropolis", "noodles"];
 
 const getKeywordsFromLex = async (searchQuery) => {
   if (!searchQuery) {
@@ -32,20 +32,41 @@ const getKeywordsFromLex = async (searchQuery) => {
 
   const params = {
     botId: "BVMUUWPFRU",
-    botAliasId: "DNTRSKGKUZ",
+    botAliasId: "TSTALIASID",
     localeId: "en_US",
     sessionId: "search-session",
     text: searchQuery,
   };
 
   const response = await lexClient.recognizeText(params);
-  console.log("Lex response:", response);
   const slots = response.sessionState.intent.slots;
-  console.log("Slots:", slots);
-  const keywords = Object.values(slots)
-    .filter((slot) => slot) // Filter out null slots
-    .map((slot) => slot.value.interpretedValue);
+  const keywords = [];
+  for (const slot in slots) {
+    if (slots[slot]) {
+      const slotValue = slots[slot].value.interpretedValue;
+      keywords.push(slotValue);
+    }
+  }
   console.log("Keywords:", keywords);
+  return keywords;
+};
+
+const cleanUpKeywords = (keywords) => {
+  // Replace unwanted words with commas, then split by commas, and trim spaces
+  keywords = keywords.flatMap((keyword) =>
+    keyword
+      .replace(/(?: and | in | the | a )/gi, ",")
+      .split(",")
+      .map((part) => part.trim())
+  );
+  // Filter out empty strings
+  keywords = keywords.filter((keyword) => keyword);
+  // Group words like "living room" into "livingroom"
+  keywords = keywords.map((keyword) => keyword.replace(/\s+/g, ""));
+  // lowercase all keywords
+  keywords = keywords.map((keyword) => keyword.toLowerCase());
+  // singularize plural keywords
+  keywords = keywords.map((keyword) => pluralize.singular(keyword));
   return keywords;
 };
 
@@ -81,26 +102,12 @@ const searchPhotos = async (keywords) => {
   });
   const hitsArray = results.body.hits.hits;
   if (hitsArray && hitsArray.length > 0) {
-    console.log("Found results for the given query.", hitsArray);
+    console.log("Found", hitsArray.length, "results for the given query.");
     return hitsArray.map((hit) => hit._source);
   } else {
     console.log("No results found for the given query.");
     return [];
   }
-};
-
-/**
- * Cleans up the provided keywords by adding singular form of keywords ending with "s"
- * and lowercasing all keywords
- * @param {string[]} keywords - An array of keywords to clean up
- * @returns {string[]} An array of cleaned up keywords
- */
-const cleanUpKeywords = (keywords) => {
-  // lowercase all keywords
-  keywords = keywords.map((keyword) => keyword.toLowerCase());
-  // singularize plural keywords
-  keywords = keywords.map((keyword) => pluralize.singular(keyword));
-  return keywords;
 };
 
 const customSingulars = () =>
@@ -116,6 +123,12 @@ const handler = async (event) => {
   try {
     const keywords = await getKeywordsFromLex(searchQuery);
     const searchResults = await searchPhotos(keywords);
+    if (keywords.length === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify([]),
+      };
+    }
     return {
       statusCode: 200,
       body: JSON.stringify(searchResults),
