@@ -114,8 +114,10 @@ const handler = async (event) => {
 
   const labelsFromRekognition = await detectLabelsFromImage(bucket, objectKey);
   const metadata = await getMetadata(bucket, objectKey);
-  const customLabels = metadata["x-amz-meta-customLabels"]
-    ? JSON.parse(metadata["x-amz-meta-customLabels"])
+  const customLabels = metadata["customlabels"]
+    ? metadata["customlabels"]
+        .split(",")
+        .map((label) => label.toLowerCase().replace(" ", ""))
     : [];
   const allLabels = [...labelsFromRekognition, ...customLabels];
 
@@ -124,6 +126,10 @@ const handler = async (event) => {
 
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
     body: JSON.stringify({
       message: "Successfully indexed document.",
     }),
