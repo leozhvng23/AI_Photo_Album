@@ -8,10 +8,13 @@ import { LexRuntimeV2 } from "@aws-sdk/client-lex-runtime-v2";
 import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { Client } from "@opensearch-project/opensearch";
 import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import pluralize from "pluralize";
 
 const REGION = "us-east-1";
 const lexClient = new LexRuntimeV2({ region: REGION });
+const s3Client = new S3Client({ region: REGION });
 const opensearchClient = new Client({
   ...AwsSigv4Signer({
     region: REGION,
@@ -82,6 +85,19 @@ const cleanUpKeywords = (keywords) => {
   return keywords;
 };
 
+const generatePresignedUrl = async (bucket, objectKey) => {
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: objectKey,
+  });
+
+  const url = await getSignedUrl(s3Client, command, {
+    expiresIn: 3600, // URL expiry time in seconds
+  });
+
+  return url;
+};
+
 /**
  * Searches for photos in an OpenSearch index based on the provided keywords.
  * @param {string[]} keywords - An array of keywords to search for.
@@ -115,7 +131,14 @@ const searchPhotos = async (keywords) => {
   const hitsArray = results.body.hits.hits;
   if (hitsArray && hitsArray.length > 0) {
     console.log("Found", hitsArray.length, "results for the given query.");
-    return hitsArray.map((hit) => hit._source);
+    const photos = await Promise.all(
+      hitsArray.map(async (hit) => {
+        const photo = hit._source;
+        photo.url = await generatePresignedUrl(photo.bucket, photo.objectKey);
+        return photo;
+      })
+    );
+    return photos;
   } else {
     console.log("No results found for the given query.");
     return [];
@@ -146,17 +169,35 @@ const handler = async (event) => {
     if (keywords.length === 0) {
       return {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         body: JSON.stringify([]),
       };
     }
     return {
       statusCode: 200,
-      body: JSON.stringify(searchResults),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify(
+        searchResults.map(({ url, createdTimestamp, labels }) => ({
+          url,
+          createdTimestamp,
+          labels,
+        }))
+      ),
     };
   } catch (error) {
     console.error("Error processing the event:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ message: "Internal server error" }),
     };
   }
