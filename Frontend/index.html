@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+  <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+  <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+  <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+  <script type="text/javascript" src="apigClient.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Photo Search</title>
+  </head>
+  <body>
+    <header>
+      <h1>Photo Search</h1>
+    </header>
+    <main>
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="Search for photos..." />
+        <button type="submit" id="search-button">🔍</button>
+      </form>
+      <div id="loading" style="display: none">Loading...</div>
+      <div id="search-results"></div>
+      <button id="upload-button">⬆️ Upload</button>
+      <div id="upload-modal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Upload a photo</h2>
+          <form id="upload-form">
+            <label for="photo-file">Choose a photo:</label>
+            <input type="file" id="photo-file" accept="image/*" />
+            <label for="custom-labels">Custom Labels (comma-separated):</label>
+            <input type="text" id="custom-labels" placeholder="Sam, Sally" />
+            <button type="submit" id="upload-submit">Upload</button>
+          </form>
+          <div id="upload-loading" style="display: none">Uploading...</div>
+          <div id="upload-success" style="display: none">Upload successful!</div>
+        </div>
+      </div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
