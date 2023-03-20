@@ -23,8 +23,14 @@ const opensearchClient = new Client({
   }),
   node: "https://search-photos-mxuc7wztqoqaofdypn2ua7t5le.us-east-1.es.amazonaws.com",
 });
+
 const customWords = ["pants", "metropolis", "noodles"];
 
+/**
+ * Retrieves keywords from a Lex bot based on the given search query.
+ * @param {string} searchQuery - The search query to send to the Lex bot.
+ * @returns {Promise<string[]>} A promise that resolves to an array of keywords retrieved from the Lex bot.
+ */
 const getKeywordsFromLex = async (searchQuery) => {
   if (!searchQuery) {
     throw new Error("Search query not provided");
@@ -32,7 +38,7 @@ const getKeywordsFromLex = async (searchQuery) => {
 
   const params = {
     botId: "BVMUUWPFRU",
-    botAliasId: "TSTALIASID",
+    botAliasId: "DNTRSKGKUZ",
     localeId: "en_US",
     sessionId: "search-session",
     text: searchQuery,
@@ -51,6 +57,12 @@ const getKeywordsFromLex = async (searchQuery) => {
   return keywords;
 };
 
+/**
+ * Cleans up the provided keywords by applying various modifications such as
+ * replacing unwanted words, trimming spaces, grouping words, lowercasing, and singularizing.
+ * @param {string[]} keywords - An array of keywords to clean up.
+ * @returns {string[]} An array of cleaned up keywords.
+ */
 const cleanUpKeywords = (keywords) => {
   // Replace unwanted words with commas, then split by commas, and trim spaces
   keywords = keywords.flatMap((keyword) =>
@@ -71,9 +83,9 @@ const cleanUpKeywords = (keywords) => {
 };
 
 /**
- * Searches for photos in an OpenSearch index based on the provided keywords
- * @param {string[]} keywords - An array of keywords to search for
- * @returns {Promise<object[]>} A promise that resolves to an array of photo objects that match the query
+ * Searches for photos in an OpenSearch index based on the provided keywords.
+ * @param {string[]} keywords - An array of keywords to search for.
+ * @returns {Promise<object[]>} A promise that resolves to an array of photo objects that match the query.
  */
 const searchPhotos = async (keywords) => {
   keywords = cleanUpKeywords(keywords);
@@ -110,11 +122,19 @@ const searchPhotos = async (keywords) => {
   }
 };
 
+/**
+ * Adds custom singular rules for pluralize package using the customWords array.
+ */
 const customSingulars = () =>
   customWords.forEach((word) => {
     pluralize.addSingularRule(word, word);
   });
 
+/**
+ * AWS Lambda function handler.
+ * @param {object} event - The Lambda event object.
+ * @returns {Promise<object>} A promise that resolves to an object containing the HTTP status code and response body.
+ */
 const handler = async (event) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
   const searchQuery = event.q;
