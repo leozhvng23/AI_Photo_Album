@@ -31,6 +31,8 @@ const customWords = ["pants", "metropolis", "noodles"];
 
 /**
  * Retrieves keywords from a Lex bot based on the given search query.
+ * @function
+ * @async
  * @param {string} searchQuery - The search query to send to the Lex bot.
  * @returns {Promise<string[]>} A promise that resolves to an array of keywords retrieved from the Lex bot.
  */
@@ -63,6 +65,7 @@ const getKeywordsFromLex = async (searchQuery) => {
 /**
  * Cleans up the provided keywords by applying various modifications such as
  * replacing unwanted words, trimming spaces, grouping words, lowercasing, and singularizing.
+ * @function
  * @param {string[]} keywords - An array of keywords to clean up.
  * @returns {string[]} An array of cleaned up keywords.
  */
@@ -70,7 +73,7 @@ const cleanUpKeywords = (keywords) => {
   // Replace unwanted words with commas, then split by commas, and trim spaces
   keywords = keywords.flatMap((keyword) =>
     keyword
-      .replace(/(?: and | in | the | a )/gi, ",")
+      .replace(/(?: and | a )/gi, ",")
       .split(",")
       .map((part) => part.trim())
   );
@@ -85,6 +88,14 @@ const cleanUpKeywords = (keywords) => {
   return keywords;
 };
 
+/**
+ * Generates a pre-signed URL for an S3 object.
+ * @function
+ * @async
+ * @param {string} bucket - The S3 bucket name containing the object.
+ * @param {string} objectKey - The key of the object within the bucket.
+ * @returns {Promise<string>} A promise that resolves to the generated pre-signed URL.
+ */
 const generatePresignedUrl = async (bucket, objectKey) => {
   const command = new GetObjectCommand({
     Bucket: bucket,
@@ -100,30 +111,51 @@ const generatePresignedUrl = async (bucket, objectKey) => {
 
 /**
  * Searches for photos in an OpenSearch index based on the provided keywords.
+ * @function
+ * @async
  * @param {string[]} keywords - An array of keywords to search for.
+ * @param {boolean} showRelevant - If true, shows photos that match any of the keywords; if false, shows photos that match all keywords.
+ * @param {boolean} cleanUp - If true, cleans up the keywords before searching.
  * @returns {Promise<object[]>} A promise that resolves to an array of photo objects that match the query.
  */
-const searchPhotos = async (keywords) => {
-  keywords = cleanUpKeywords(keywords);
-  console.log("Cleaned up keywords:", keywords);
-
-  const body = {
-    query: {
-      bool: {
-        must: keywords.map((keyword) => ({
-          match: {
-            labels: {
-              query: keyword,
-              boost: 1.0,
-            },
+const searchPhotos = async (keywords, showRelevant, cleanUp) => {
+  keywords = cleanUp ? cleanUpKeywords(keywords) : keywords;
+  if (cleanUp) {
+    console.log("Cleaned up keywords:", keywords);
+  }
+  const body = showRelevant
+    ? {
+        query: {
+          bool: {
+            should: keywords.map((keyword) => ({
+              match: {
+                labels: {
+                  query: keyword,
+                  boost: 1.0,
+                },
+              },
+            })),
           },
-        })),
-      },
-    },
-    size: 100,
-    _source: ["objectKey", "bucket", "createdTimestamp", "labels"],
-  };
-
+        },
+        size: 100,
+        _source: ["objectKey", "bucket", "createdTimestamp", "labels"],
+      }
+    : {
+        query: {
+          bool: {
+            must: keywords.map((keyword) => ({
+              match: {
+                labels: {
+                  query: keyword,
+                  boost: 1.0,
+                },
+              },
+            })),
+          },
+        },
+        size: 100,
+        _source: ["objectKey", "bucket", "createdTimestamp", "labels"],
+      };
   const results = await opensearchClient.search({
     index: "photos",
     body: body,
@@ -147,6 +179,7 @@ const searchPhotos = async (keywords) => {
 
 /**
  * Adds custom singular rules for pluralize package using the customWords array.
+ * @function
  */
 const customSingulars = () =>
   customWords.forEach((word) => {
@@ -155,6 +188,8 @@ const customSingulars = () =>
 
 /**
  * AWS Lambda function handler.
+ * @function
+ * @async
  * @param {object} event - The Lambda event object.
  * @returns {Promise<object>} A promise that resolves to an object containing the HTTP status code and response body.
  */
@@ -165,17 +200,24 @@ const handler = async (event) => {
 
   try {
     const keywords = await getKeywordsFromLex(searchQuery);
-    const searchResults = await searchPhotos(keywords);
+    let searchResults = [];
+
     if (keywords.length === 0) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
-        },
-        body: JSON.stringify([]),
-      };
+      const newKeywords = searchQuery
+        .split(",")
+        .map((word) => word.toLowerCase().replace(" ", ""));
+      console.log("Keywords not from lex:", newKeywords);
+      searchResults = await searchPhotos(newKeywords, true, false);
+    } else {
+      searchResults = await searchPhotos(keywords, false, true);
+      if (searchResults.length === 0) {
+        searchResults = await searchPhotos(keywords, false, false);
+        if (searchResults.length === 0) {
+          searchResults = await searchPhotos(keywords, true, false);
+        }
+      }
     }
+
     return {
       statusCode: 200,
       headers: {
