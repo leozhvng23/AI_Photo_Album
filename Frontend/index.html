@@ -18,27 +18,55 @@
     <title>Photo Search</title>
   </head>
   <body>
-    <header>
-      <h1>Photo Search</h1>
+    <header id="header">
+      <h1>Leo's Photo Album</h1>
     </header>
     <main>
       <form id="search-form">
-        <input type="text" id="search-input" placeholder="Search for photos..." />
-        <button type="submit" id="search-button">🔍</button>
+        <div id="search-container">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Show me photos of wine and sake..."
+          />
+          <button type="submit" id="search-button" title="search">🔍</button>
+          <button id="upload-button" title="upload photo">⬆️</button>
+        </div>
       </form>
-      <div id="loading" style="display: none">Loading...</div>
+      <div id="loading" style="display: none">Searching...</div>
+      <div id="no-results" style="display: none">No images found.</div>
       <div id="search-results"></div>
-      <button id="upload-button">⬆️ Upload</button>
+      <!-- Image Modal -->
+      <div id="image-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-close"><span class="close">&times;</span></div>
+          <button class="nav-button" id="left-button">&#8592;</button>
+          <img id="modal-image" src="" alt="" />
+          <button class="nav-button" id="right-button">&#8594;</button>
+        </div>
+      </div>
+      <!-- Upload Modal -->
       <div id="upload-modal" class="modal">
         <div class="modal-content">
-          <span class="close">&times;</span>
+          <div class="modal-close">
+            <span class="close">&times;</span>
+          </div>
           <h2>Upload a photo</h2>
+          <br />
           <form id="upload-form">
             <label for="photo-file">Choose a photo:</label>
             <input type="file" id="photo-file" accept="image/*" />
-            <label for="custom-labels">Custom Labels (comma-separated):</label>
-            <input type="text" id="custom-labels" placeholder="Sam, Sally" />
-            <button type="submit" id="upload-submit">Upload</button>
+            <br />
+            <label for="custom-labels">Add custom labels (optional):</label>
+            <input
+              type="text"
+              id="custom-labels"
+              placeholder="karaoke, rock climbing, ... (comma separated)"
+            />
+            <br />
+            <div class="center-container">
+              <button type="submit" id="upload-submit">Upload</button>
+            </div>
           </form>
           <div id="upload-loading" style="display: none">Uploading...</div>
           <div id="upload-success" style="display: none">Upload successful!</div>
