@@ -1,5 +1,5 @@
 <div>
-  <h1>Image Upload and Search Photo Album Web App</h1>
+  <h1>AWS Photo Album Web App</h1>
   <p>
     <a
       href="http://photo-album-webapp-frontend.s3-website-us-east-1.amazonaws.com/"
