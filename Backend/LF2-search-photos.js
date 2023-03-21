@@ -187,6 +187,28 @@ const customSingulars = () =>
   });
 
 /**
+ * Processes the search query by converting it into an array of keywords.
+ * If the search query is "*", it returns an empty array.
+ * Otherwise, it splits the search query by commas, removes spaces, and converts each keyword to lowercase.
+ * @function
+ * @param {string} searchQuery - The search query to process.
+ * @returns {string[]} An array of keywords extracted from the search query.
+ */
+const getKeywordsFromInput = (searchQuery) => {
+  const wordToFind = "all";
+  const regex = new RegExp(`\\b${wordToFind}\\b`, "i");
+  if (searchQuery === "*" || regex.test(searchQuery)) {
+    // search for all photos
+    return [];
+  }
+  const newKeywords = searchQuery
+    .split(",")
+    .map((word) => word.toLowerCase().replace(" ", ""));
+  console.log("Keywords not from lex:", newKeywords);
+  return newKeywords;
+};
+
+/**
  * AWS Lambda function handler.
  * @function
  * @async
@@ -201,20 +223,31 @@ const handler = async (event) => {
   try {
     const keywords = await getKeywordsFromLex(searchQuery);
     let searchResults = [];
-
     if (keywords.length === 0) {
-      const newKeywords = searchQuery
-        .split(",")
-        .map((word) => word.toLowerCase().replace(" ", ""));
-      console.log("Keywords not from lex:", newKeywords);
-      searchResults = await searchPhotos(newKeywords, true, false);
+      // If no keywords were detected by lex, search for photos using the original search query
+      searchResults = await searchPhotos(getKeywordsFromInput(searchQuery), true, false);
     } else {
+      // search for photos that match all of the cleaned up lex keywords
       searchResults = await searchPhotos(keywords, false, true);
       if (searchResults.length === 0) {
+        // search photos that match any of the cleaned up lex keywords
+        searchResults = await searchPhotos(keywords, true, true);
+      }
+      if (searchResults.length === 0) {
+        // search photos that match all of the original lex keywords
+        searchResults = await searchPhotos(keywords, true, false);
+      }
+      if (searchResults.length === 0) {
+        // search photos that match any of the original lex keywords
         searchResults = await searchPhotos(keywords, false, false);
-        if (searchResults.length === 0) {
-          searchResults = await searchPhotos(keywords, true, false);
-        }
+      }
+      if (searchResults.length === 0) {
+        // search photos that match any of the original user input keywords
+        searchResults = await searchPhotos(
+          getKeywordsFromInput(searchQuery),
+          true,
+          false
+        );
       }
     }
 
