@@ -159,3 +159,62 @@ searchResults.addEventListener("click", (event) => {
 closeModalImage.addEventListener("click", closeImageModal);
 leftButton.addEventListener("click", showPreviousImage);
 rightButton.addEventListener("click", showNextImage);
+
+const voiceButton = document.getElementById("voice-button");
+
+voiceButton.addEventListener("click", () => {
+  startVoiceSearch();
+});
+
+const startVoiceSearch = async () => {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Your browser does not support SpeechRecognition. Please try another browser.");
+    return;
+  }
+
+  if (localStorage.getItem("micPermissionRequested") !== "true") {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // If permission granted, set the flag in localStorage
+      localStorage.setItem("micPermissionRequested", "true");
+      stream.getTracks().forEach((track) => track.stop());
+    } catch (err) {
+      console.error("Error requesting microphone permission:", err);
+    }
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.start();
+
+  recognition.addEventListener("result", (event) => {
+    const transcript = event.results[0][0].transcript;
+    searchInput.value = transcript;
+    searchPhotos(transcript);
+  });
+
+  recognition.addEventListener("error", (event) => {
+    alert("Error: " + event.error);
+  });
+};
+
+const requestMicrophonePermission = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // If permission granted, set the flag in localStorage
+    localStorage.setItem("micPermissionRequested", "true");
+    stream.getTracks().forEach((track) => track.stop());
+  } catch (err) {
+    console.error("Error requesting microphone permission:", err);
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("micPermissionRequested") !== "true") {
+    requestMicrophonePermission();
+  }
+});

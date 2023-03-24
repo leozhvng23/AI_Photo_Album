@@ -11,9 +11,14 @@
   <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
   <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
   <script type="text/javascript" src="apigClient.js"></script>
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline'; img-src * data:; connect-src *; media-src *;"
+    />
     <link rel="stylesheet" href="styles.css" />
     <title>Photo Search</title>
   </head>
@@ -29,6 +34,7 @@
             id="search-input"
             placeholder="Show me photos of wine and sake..."
           />
+          <button id="voice-button" title="voice search">🎙</button>
           <button type="submit" id="search-button" title="search">🔍</button>
           <button id="upload-button" title="upload photo">⬆️</button>
         </div>
