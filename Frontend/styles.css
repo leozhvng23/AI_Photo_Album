@@ -216,3 +216,9 @@ button:hover {
 #header {
   cursor: pointer;
 }
+
+#voice-button.active {
+  background-color: #f1c40f;
+  color: #333;
+  border-radius: 50%;
+}

@@ -176,7 +176,6 @@ const startVoiceSearch = async () => {
   if (localStorage.getItem("micPermissionRequested") !== "true") {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // If permission granted, set the flag in localStorage
       localStorage.setItem("micPermissionRequested", "true");
       stream.getTracks().forEach((track) => track.stop());
     } catch (err) {
@@ -191,6 +190,14 @@ const startVoiceSearch = async () => {
 
   recognition.start();
 
+  recognition.addEventListener("start", () => {
+    voiceButton.classList.add("active");
+  });
+
+  recognition.addEventListener("end", () => {
+    voiceButton.classList.remove("active");
+  });
+
   recognition.addEventListener("result", (event) => {
     const transcript = event.results[0][0].transcript;
     searchInput.value = transcript;
@@ -202,19 +209,19 @@ const startVoiceSearch = async () => {
   });
 };
 
-const requestMicrophonePermission = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // If permission granted, set the flag in localStorage
-    localStorage.setItem("micPermissionRequested", "true");
-    stream.getTracks().forEach((track) => track.stop());
-  } catch (err) {
-    console.error("Error requesting microphone permission:", err);
-  }
-};
+// const requestMicrophonePermission = async () => {
+//   try {
+//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//     // If permission granted, set the flag in localStorage
+//     localStorage.setItem("micPermissionRequested", "true");
+//     stream.getTracks().forEach((track) => track.stop());
+//   } catch (err) {
+//     console.error("Error requesting microphone permission:", err);
+//   }
+// };
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (localStorage.getItem("micPermissionRequested") !== "true") {
-    requestMicrophonePermission();
-  }
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   if (localStorage.getItem("micPermissionRequested") !== "true") {
+//     requestMicrophonePermission();
+//   }
+// });
