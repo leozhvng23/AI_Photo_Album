@@ -161,6 +161,20 @@ leftButton.addEventListener("click", showPreviousImage);
 rightButton.addEventListener("click", showNextImage);
 
 const voiceButton = document.getElementById("voice-button");
+const microphoneIcon = document.createElement("span");
+microphoneIcon.textContent = "🎙";
+voiceButton.appendChild(microphoneIcon);
+
+const loadingDots = document.createElement("div");
+loadingDots.classList.add("loading-dots");
+loadingDots.style.display = "none";
+voiceButton.appendChild(loadingDots);
+
+for (let i = 0; i < 3; i++) {
+  const dot = document.createElement("div");
+  dot.classList.add("loading-dot");
+  loadingDots.appendChild(dot);
+}
 
 voiceButton.addEventListener("click", () => {
   startVoiceSearch();
@@ -191,11 +205,13 @@ const startVoiceSearch = async () => {
   recognition.start();
 
   recognition.addEventListener("start", () => {
-    voiceButton.classList.add("active");
+    microphoneIcon.style.display = "none";
+    loadingDots.style.display = "inline-block";
   });
 
   recognition.addEventListener("end", () => {
-    voiceButton.classList.remove("active");
+    microphoneIcon.style.display = "inline-block";
+    loadingDots.style.display = "none";
   });
 
   recognition.addEventListener("result", (event) => {
@@ -205,7 +221,20 @@ const startVoiceSearch = async () => {
   });
 
   recognition.addEventListener("error", (event) => {
-    alert("Error: " + event.error);
+    let errorMessage = "An error occurred during voice recognition.";
+    if (event.error === "not-allowed") {
+      errorMessage = "Permission to access the microphone was denied.";
+    } else if (event.error === "no-speech") {
+      errorMessage = "No speech was detected. Please try again.";
+    } else if (event.error === "network") {
+      errorMessage =
+        "A network error occurred. Please check your internet connection and try again.";
+    }
+
+    alert(errorMessage);
+
+    microphoneIcon.style.display = "inline-block";
+    loadingDots.style.display = "none";
   });
 };
 

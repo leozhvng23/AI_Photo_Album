@@ -48,6 +48,10 @@ main {
 }
 #search-input {
   width: 400px;
+  padding-right: 40px;
+  box-sizing: border-box;
+  border-radius: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 #custom-labels {
   margin-top: 0px;
@@ -221,4 +225,65 @@ button:hover {
   background-color: #f1c40f;
   color: #333;
   border-radius: 50%;
+}
+
+.input-group {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+#voice-button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  outline: none;
+}
+
+/* loading dots */
+.loading-dots {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 6px;
+}
+
+.loading-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #333;
+  border-radius: 50%;
+  animation: loading-dots 1.4s infinite ease-in-out both;
+}
+
+.loading-dot:nth-child(1) {
+  left: 0;
+  animation-delay: -0.32s;
+}
+
+.loading-dot:nth-child(2) {
+  left: 8px;
+  animation-delay: -0.16s;
+}
+
+.loading-dot:nth-child(3) {
+  left: 16px;
+  animation-delay: 0s;
+}
+
+@keyframes loading-dots {
+  0%,
+  80%,
+  100% {
+    transform: scaleY(0.4);
+  }
+  40% {
+    transform: scaleY(1);
+  }
 }
