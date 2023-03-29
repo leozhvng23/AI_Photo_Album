@@ -30,18 +30,18 @@
   </head>
   <body>
     <header id="header">
-      <h1>Leo's Photo Album</h1>
+      <h1>AI Photo Album</h1>
     </header>
     <main>
       <form id="search-form">
         <div id="search-container">
-          <div class="input-group">
+          <div class="input-group search-input-group">
             <input
               type="text"
               id="search-input"
               placeholder="Show me photos of wine and sake..."
             />
-            <div id="voice-button">
+            <button type="button" id="voice-button">
               <span class="icon-container" id="microphone">
                 <img
                   src="./assets/icons/microphone.svg"
@@ -49,32 +49,39 @@
                   class="mic-icon"
                 />
               </span>
-            </div>
+            </button>
           </div>
-          <button type="submit" class="circular-button" id="search-button" title="search">
-            <span class="icon-container">
-              <img
-                src="./assets/icons/search.svg"
-                alt="search icon"
-                class="search-icon"
-                id="search-icon"
-              />
-            </span>
-          </button>
-          <button
-            id="upload-button"
-            class="circular-button"
-            type="button"
-            title="upload photo"
-          >
-            <span class="icon-container">
-              <img
-                src="./assets/icons/upload-photo.svg"
-                alt="upload photo icon"
-                class="upload-image-icon"
-              />
-            </span>
-          </button>
+          <div class="button-group">
+            <button
+              type="submit"
+              class="circular-button"
+              id="search-button"
+              title="search"
+            >
+              <span class="icon-container">
+                <img
+                  src="./assets/icons/search.svg"
+                  alt="search icon"
+                  class="search-icon"
+                  id="search-icon"
+                />
+              </span>
+            </button>
+            <button
+              id="upload-button"
+              class="circular-button"
+              type="button"
+              title="upload photo"
+            >
+              <span class="icon-container">
+                <img
+                  src="./assets/icons/upload-photo.svg"
+                  alt="upload photo icon"
+                  class="upload-image-icon"
+                />
+              </span>
+            </button>
+          </div>
         </div>
       </form>
       <i class="fas fa-microphone"></i>
@@ -85,9 +92,25 @@
       <div id="image-modal" class="modal">
         <div class="modal-content">
           <div class="modal-close"><span class="close">&times;</span></div>
-          <button class="nav-button" id="left-button">&#8592;</button>
+          <button class="nav-button" id="left-button">
+            <span class="icon-container">
+              <img
+                src="./assets/icons/arrow.svg"
+                alt="left arrow icon"
+                class="left-arrow-icon"
+              />
+            </span>
+          </button>
           <img id="modal-image" src="" alt="" />
-          <button class="nav-button" id="right-button">&#8594;</button>
+          <button class="nav-button" id="right-button">
+            <span class="icon-container">
+              <img
+                src="./assets/icons/arrow.svg"
+                alt="right arrow icon"
+                class="right-arrow-icon"
+              />
+            </span>
+          </button>
         </div>
       </div>
       <!-- Upload Modal -->

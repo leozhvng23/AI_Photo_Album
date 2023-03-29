@@ -21,6 +21,7 @@ body {
   font-family: "Poppins", sans-serif;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
 
 input {
@@ -49,13 +50,7 @@ main {
   flex-direction: column;
   align-items: center;
   margin-bottom: 40px;
-}
-
-#search-container {
-  display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: center;
 }
 
 .search-icon {
@@ -87,12 +82,12 @@ main {
 }
 
 #custom-labels {
-  width: 100%;
   padding: 8px;
   margin: 10px 0;
   border: 1px solid #ccc;
   justify-content: center;
   height: 20px;
+  max-width: 280px;
   width: 100%;
   padding-left: 10px;
   border-radius: 5px;
@@ -128,19 +123,22 @@ main {
   top: 0;
   width: 100%;
   min-width: fit-content;
-  height: 100%;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
   background-color: #fefefe;
-  margin: 15% auto;
+  margin: auto;
+  transform: translateY(50%);
   padding: 20px;
-  padding-right: 35px;
-  border: 1px solid #888;
+  /* border: 1px solid #888; */
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
   border-radius: 10px;
-  width: 350px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -150,15 +148,16 @@ main {
   display: flex;
   justify-content: flex-end;
   width: 100%;
-  margin-top: -10px;
-  margin-bottom: -20px;
 }
 
 .modal-close span {
   color: #aaa;
   font-size: 28px;
   font-weight: bold;
-  margin-right: -10px;
+  margin-right: 0;
+  position: absolute;
+  right: 14px;
+  top: 2px;
 }
 
 .close:hover,
@@ -171,17 +170,50 @@ main {
 #search-results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  grid-gap: 10px;
+  grid-gap: 20px 20px;
+  max-width: 1200px;
   width: 100%;
-  max-width: 800px;
   margin-top: 20px;
   margin-bottom: 50px;
+  justify-content: center;
 }
+
+/* For screens smaller than 600px */
+@media (max-width: 599px) {
+  #search-results {
+    grid-template-columns: repeat(1, 1fr);
+    justify-items: center;
+  }
+}
+
+/* For screens between 600px and 900px */
+@media (min-width: 600px) and (max-width: 899px) {
+  #search-results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* For screens larger than 900px */
+@media (min-width: 900px) {
+  #search-results {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* For screens larger than 1200px */
+@media (min-width: 1200px) {
+  #search-results {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 #search-results img {
   width: 250px;
   height: 250px;
   object-fit: cover;
   cursor: pointer;
+  border-radius: 3%;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 }
 
 /* Upload Form */
@@ -225,53 +257,87 @@ main {
 
 /* Image Modal */
 
-#image-modal {
-  height: 100%;
-}
-
 #image-modal .modal-content {
-  display: flex;
   width: 80%;
-  height: fit-content;
+  max-width: 950px;
+  transform: translateY(10%);
+  padding: 2% 5%;
+  /* height: fit-content;
   flex-direction: column;
   align-items: center;
   position: relative;
   margin-top: 50px;
+  transform: translateY(50%);
+  margin: auto; */
+
+  /* background-color: #fefefe;
+  margin: auto;
+  transform: translateY(50%);
+  padding: 20px;
+  padding-right: 35px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; */
 }
 
 #modal-image {
-  padding: 20px;
-  margin-top: -5px;
-  max-width: 90%;
+  margin: 20px;
+  margin-top: 10px;
+  max-width: 100%;
   max-height: 800px;
 }
 
 .nav-button {
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  padding-top: 5px;
   z-index: 1;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: none;
+}
+
+.nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.left-arrow-icon,
+.right-arrow-icon {
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+}
+
+.left-arrow-icon {
+  transform: rotate(180deg);
 }
 
 #left-button {
   left: 5px;
   top: 50%;
-  margin-right: -10px;
-  margin-left: 10px;
   transform: translateY(-50%);
+  background-color: none;
+  background: none;
 }
 
 #right-button {
   right: 5px;
   top: 50%;
-  margin-left: -10px;
-  margin-right: 10px;
   transform: translateY(-50%);
+  background-color: none;
+  background: none;
+}
+
+#left-button:hover,
+#right-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 #upload-loading,
@@ -290,17 +356,68 @@ main {
   cursor: pointer;
 }
 
+#search-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
 .input-group {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 400px;
   height: 40px;
-  width: 100%;
+  min-width: 300px;
   padding-left: 10px;
   border-radius: 25px;
   box-shadow: 0 1px 3px rgba(99, 99, 99, 0.1);
   border: 1.5px solid #a1a1a152;
+}
+
+.search-input-group {
+  flex: 1;
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+}
+
+/* For screens smaller than 600px */
+@media (max-width: 599px) {
+  .search-input-group {
+    max-width: 300px;
+    width: 100%;
+  }
+  .button-group {
+    width: 100%;
+    margin-top: 30px;
+    justify-content: center;
+  }
+}
+
+/* For screens between 600px and 900px */
+@media (min-width: 600px) and (max-width: 899px) {
+  .search-input-group {
+    width: 75%;
+  }
+  .button-group {
+    width: fit-content;
+    justify-content: center;
+  }
+}
+
+/* For screens larger than 900px */
+@media (min-width: 900px) {
+  .search-input-group {
+    width: 75%;
+    min-width: 500px;
+  }
+  .button-group {
+    width: fit-content;
+    justify-content: center;
+  }
 }
 
 #search-input {
@@ -371,19 +488,22 @@ main {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  border: none;
+  background: none;
+  background-color: none;
 }
 
-#voice-button:hover {
+/* #voice-button:hover {
   background-color: #f2f2f2;
-}
+} */
 
 .icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #767676;
   cursor: pointer;
   width: 50px;
+  background-color: none;
 }
 
 .mic-icon {
@@ -399,6 +519,7 @@ main {
   width: 24px;
   height: 6px;
   margin-right: 5px;
+  cursor: pointer;
 }
 
 .loading-dot {
