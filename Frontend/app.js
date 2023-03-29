@@ -17,6 +17,9 @@ const closeModalImage = document.querySelector("#image-modal .close");
 const modalImage = document.getElementById("modal-image");
 const leftButton = document.getElementById("left-button");
 const rightButton = document.getElementById("right-button");
+const searchIcon = document.getElementById("search-icon");
+const uploadLaptopIcon = document.getElementById("upload-laptop");
+const fileNameElement = document.getElementById("file-name");
 
 const apigClient = apigClientFactory.newClient();
 const API_GATEWAY_PUT_URL =
@@ -26,11 +29,30 @@ document.getElementById("header").addEventListener("click", function () {
   window.location.reload();
 });
 
+const placeholders = [
+  "Show me photos of wine and sake...",
+  "Show me photos of food...",
+  "Show me pictures of plants...",
+  "Show me all the pictures...",
+  "Show me photos with people in them...",
+];
+
+const getRandomPlaceholder = () => {
+  const index = Math.floor(Math.random() * placeholders.length);
+  return placeholders[index];
+};
+
+/* search form */
+
 const toggleLoading = (isLoading) => {
   if (isLoading) {
-    loading.style.display = "block";
+    searchIcon.src = "./assets/icons/loading.svg";
+    searchIcon.classList.add("loading-icon");
+    searchIcon.classList.remove("search-icon");
   } else {
-    loading.style.display = "none";
+    searchIcon.src = "./assets/icons/search.svg";
+    searchIcon.classList.remove("loading-icon");
+    searchIcon.classList.add("search-icon");
   }
 };
 
@@ -69,34 +91,52 @@ const searchPhotos = async (query) => {
   toggleLoading(false);
 };
 
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  searchPhotos(searchInput.value);
+});
+
+/* upload form */
+
+uploadLaptopIcon.addEventListener("click", () => {
+  photoFile.click();
+});
+
 const uploadPhoto = async (file, fileName, customLabels) => {
   toggleUploadLoading(true);
   const encodedFileName = encodeURIComponent(fileName);
   const url = API_GATEWAY_PUT_URL.replace("{filename}", encodedFileName);
   console.log("url: ", url);
-  const uploadResponse = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type,
-      "x-amz-meta-customLabels": customLabels,
-    },
-    body: file,
-  });
-  console.log("uploadResponse: ", uploadResponse);
-
-  if (uploadResponse.ok) {
+  try {
+    const uploadResponse = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type,
+        "x-amz-meta-customLabels": customLabels,
+      },
+      body: file,
+    });
     showUploadSuccess();
-  } else {
-    alert("Upload failed!");
+    console.log("uploadResponse: ", uploadResponse);
+    toggleUploadLoading(false);
+  } catch (error) {
+    console.log("Error:", error);
+    if (error.message === "Failed to fetch") {
+      alert("File too large. Please upload a file smaller than 10MB.");
+    } else {
+      alert("Upload failed!");
+    }
+    toggleUploadLoading(false);
   }
 
-  toggleUploadLoading(false);
-};
+  // if (uploadResponse.ok) {
+  //   showUploadSuccess();
+  // } else {
+  //   alert("Upload failed!");
+  // }
 
-searchForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  searchPhotos(searchInput.value);
-});
+  // toggleUploadLoading(false);
+};
 
 uploadButton.addEventListener("click", () => {
   uploadModal.style.display = "block";
@@ -122,8 +162,19 @@ const showUploadSuccess = () => {
 uploadForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const file = photoFile.files[0];
+  if (!file) {
+    alert("Please select an image file to upload.");
+    return;
+  }
   await uploadPhoto(file, file.name, customLabels.value);
 });
+
+photoFile.addEventListener("change", function () {
+  const fileName = this.files[0] ? this.files[0].name : "No file selected";
+  fileNameElement.textContent = fileName;
+});
+
+/* image modal */
 
 let currentImageIndex = 0;
 let allImages = [];
@@ -160,10 +211,10 @@ closeModalImage.addEventListener("click", closeImageModal);
 leftButton.addEventListener("click", showPreviousImage);
 rightButton.addEventListener("click", showNextImage);
 
+/* voice search */
+
 const voiceButton = document.getElementById("voice-button");
-const microphoneIcon = document.createElement("span");
-microphoneIcon.textContent = "🎙";
-voiceButton.appendChild(microphoneIcon);
+const microphoneIcon = document.getElementById("microphone");
 
 const loadingDots = document.createElement("div");
 loadingDots.classList.add("loading-dots");
@@ -206,12 +257,15 @@ const startVoiceSearch = async () => {
 
   recognition.addEventListener("start", () => {
     microphoneIcon.style.display = "none";
-    loadingDots.style.display = "inline-block";
+    loadingDots.style.display = "flex";
+    searchInput.value = "";
+    searchInput.placeholder = "Listening . . .";
   });
 
   recognition.addEventListener("end", () => {
-    microphoneIcon.style.display = "inline-block";
+    microphoneIcon.style.display = "flex";
     loadingDots.style.display = "none";
+    searchInput.placeholder = getRandomPlaceholder();
   });
 
   recognition.addEventListener("result", (event) => {
@@ -232,25 +286,27 @@ const startVoiceSearch = async () => {
     }
 
     alert(errorMessage);
-
-    microphoneIcon.style.display = "inline-block";
+    microphoneIcon.style.display = "flex";
     loadingDots.style.display = "none";
+    searchInput.placeholder = getRandomPlaceholder();
   });
 };
 
-// const requestMicrophonePermission = async () => {
-//   try {
-//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//     // If permission granted, set the flag in localStorage
-//     localStorage.setItem("micPermissionRequested", "true");
-//     stream.getTracks().forEach((track) => track.stop());
-//   } catch (err) {
-//     console.error("Error requesting microphone permission:", err);
-//   }
-// };
+const requestMicrophonePermission = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // If permission granted, set the flag in localStorage
+    localStorage.setItem("micPermissionRequested", "true");
+    stream.getTracks().forEach((track) => track.stop());
+  } catch (err) {
+    console.error("Error requesting microphone permission:", err);
+  }
+};
 
-// document.addEventListener("DOMContentLoaded", () => {
-//   if (localStorage.getItem("micPermissionRequested") !== "true") {
-//     requestMicrophonePermission();
-//   }
-// });
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("micPermissionRequested") !== "true") {
+    requestMicrophonePermission();
+  }
+  // random placeholder
+  searchInput.placeholder = getRandomPlaceholder();
+});

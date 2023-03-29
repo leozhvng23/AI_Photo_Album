@@ -11,15 +11,21 @@
   <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
   <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
   <script type="text/javascript" src="apigClient.js"></script>
-
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self' 'unsafe-inline'; img-src * data:; connect-src *; media-src *;"
+      content="img-src * data:; connect-src *; media-src *;"
     />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+      rel="stylesheet"
+    />
+
     <title>Photo Search</title>
   </head>
   <body>
@@ -35,13 +41,44 @@
               id="search-input"
               placeholder="Show me photos of wine and sake..."
             />
-            <button id="voice-button" type="button" title="voice search"></button>
+            <div id="voice-button">
+              <span class="icon-container" id="microphone">
+                <img
+                  src="./assets/icons/microphone.svg"
+                  alt="voice search icon"
+                  class="mic-icon"
+                />
+              </span>
+            </div>
           </div>
-          <button type="submit" id="search-button" title="search">🔍</button>
-          <button id="upload-button" title="upload photo">⬆️</button>
+          <button type="submit" class="circular-button" id="search-button" title="search">
+            <span class="icon-container">
+              <img
+                src="./assets/icons/search.svg"
+                alt="search icon"
+                class="search-icon"
+                id="search-icon"
+              />
+            </span>
+          </button>
+          <button
+            id="upload-button"
+            class="circular-button"
+            type="button"
+            title="upload photo"
+          >
+            <span class="icon-container">
+              <img
+                src="./assets/icons/upload-photo.svg"
+                alt="upload photo icon"
+                class="upload-image-icon"
+              />
+            </span>
+          </button>
         </div>
       </form>
-      <div id="loading" style="display: none">Searching...</div>
+      <i class="fas fa-microphone"></i>
+      <!-- <div id="loading" style="display: none">Searching...</div> -->
       <div id="no-results" style="display: none">No images found.</div>
       <div id="search-results"></div>
       <!-- Image Modal -->
@@ -60,20 +97,33 @@
             <span class="close">&times;</span>
           </div>
           <h2>Upload a photo</h2>
-          <br />
           <form id="upload-form">
             <label for="photo-file">Choose a photo:</label>
             <input type="file" id="photo-file" accept="image/*" />
+            <div class="upload-row">
+              <button type="button" id="upload-laptop" class="circular-button">
+                <span class="icon-container">
+                  <img
+                    src="./assets/icons/upload-laptop.svg"
+                    alt="upload from local machine icon"
+                    class="upload-laptop-icon"
+                  />
+                </span>
+              </button>
+              <span class="file-name" id="file-name"></span>
+            </div>
             <br />
             <label for="custom-labels">Add custom labels (optional):</label>
             <input
               type="text"
               id="custom-labels"
-              placeholder="karaoke, rock climbing, ... (comma separated)"
+              placeholder="birds, trees, ... (comma separated)"
             />
             <br />
             <div class="center-container">
-              <button type="submit" id="upload-submit">Upload</button>
+              <button class="rectangular-button" type="submit" id="upload-submit">
+                <span>Upload</span>
+              </button>
             </div>
           </form>
           <div id="upload-loading" style="display: none">Uploading...</div>
