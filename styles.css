@@ -295,6 +295,7 @@ main {
   margin-top: 10px;
   max-width: 100%;
   max-height: 800px;
+  min-height: auto;
   display: block;
 }
 
