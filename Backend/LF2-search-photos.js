@@ -195,15 +195,20 @@ const customSingulars = () =>
  * @returns {string[]} An array of keywords extracted from the search query.
  */
 const getKeywordsFromInput = (searchQuery) => {
-  const wordToFind = "all";
-  const regex = new RegExp(`\\b${wordToFind}\\b`, "i");
-  if (searchQuery === "*" || regex.test(searchQuery)) {
+  const wordToFind = ["all", "everything"];
+  const regexAll = new RegExp(`\\b${wordToFind[0]}\\b`, "i");
+  const regexEverything = new RegExp(`\\b${wordToFind[1]}\\b`, "i");
+  if (
+    searchQuery === "*" ||
+    regexAll.test(searchQuery) ||
+    regexEverything.test(searchQuery)
+  ) {
     // search for all photos
     return [];
   }
   const newKeywords = searchQuery
-    .split(",")
-    .map((word) => word.toLowerCase().replace(" ", ""));
+    .split(" ")
+    .map((keyword) => keyword.trim().toLowerCase());
   console.log("Keywords not from lex:", newKeywords);
   return newKeywords;
 };
