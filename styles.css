@@ -284,7 +284,7 @@ main {
 }
 
 .image-container {
-  width: 100%;
+  width: fit-content;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -296,7 +296,7 @@ main {
   height: auto;
   margin: 20px 0px;
   margin-top: 10px;
-  max-width: fit-content;
+  max-width: 1000px;
   max-height: 800px;
   min-height: auto;
   display: block;
