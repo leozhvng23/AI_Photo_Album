@@ -30,11 +30,11 @@ document.getElementById("header").addEventListener("click", function () {
 });
 
 const placeholders = [
-  "Show me photos of wine and sake...",
-  "Show me photos of food...",
-  "Show me pictures of plants...",
+  "Show me wine and sake...",
+  "Show me pictures of food...",
+  "Show me photos of plants...",
   "Show me all the pictures...",
-  "Show me photos with people in them...",
+  "Photos with people in them...",
 ];
 
 const getRandomPlaceholder = () => {
@@ -58,7 +58,7 @@ const toggleLoading = (isLoading) => {
 
 const displaySearchResults = (photos) => {
   if (photos.length === 0) {
-    searchResults.innerHTML = "<div></div><div> No images found. </div>";
+    noResults.style.display = "block";
   } else {
     searchResults.innerHTML = photos
       .map(
@@ -74,6 +74,7 @@ const displaySearchResults = (photos) => {
 
 const searchPhotos = async (query) => {
   toggleLoading(true);
+  noResults.style.display = "none";
   const params = {
     q: query,
   };
@@ -227,7 +228,9 @@ for (let i = 0; i < 3; i++) {
   loadingDots.appendChild(dot);
 }
 
-voiceButton.addEventListener("click", () => {
+let voiceSearching = false;
+
+microphoneIcon.addEventListener("click", () => {
   startVoiceSearch();
 });
 
@@ -255,6 +258,9 @@ const startVoiceSearch = async () => {
 
   recognition.start();
 
+  loadingDots.addEventListener("click", () => {
+    recognition.stop();
+  });
   recognition.addEventListener("start", () => {
     microphoneIcon.style.display = "none";
     loadingDots.style.display = "flex";
