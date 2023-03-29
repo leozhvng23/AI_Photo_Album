@@ -284,7 +284,8 @@ main {
 }
 
 .image-container {
-  width: 100%;
+  max-width: max-content;
+  object-fit: contain;
 }
 
 #modal-image {
@@ -297,7 +298,7 @@ main {
   max-height: 800px;
   min-height: auto;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .nav-button {
