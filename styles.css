@@ -285,8 +285,8 @@ main {
 
 #modal-image {
   /* keep aspect ratio */
-  width: 100%;
-  height: min-content;
+  width: auto;
+  height: auto;
   margin: 20px 0px;
   margin-top: 10px;
   max-width: 100%;
