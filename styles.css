@@ -294,7 +294,7 @@ main {
   height: auto;
   margin: 20px 0px;
   margin-top: 10px;
-  max-width: max-content;
+  max-width: auto;
   max-height: 800px;
   min-height: auto;
   display: block;
