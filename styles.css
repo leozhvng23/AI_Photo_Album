@@ -259,7 +259,7 @@ main {
 
 #image-modal .modal-content {
   width: 80%;
-  max-width: 950px;
+  max-width: max-content;
   transform: translateY(10%);
   padding: 2% 5%;
   /* height: fit-content;
