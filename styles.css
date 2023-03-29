@@ -298,7 +298,7 @@ main {
   max-height: 800px;
   min-height: auto;
   display: block;
-  object-fit: contain;
+  object-fit: scale-down;
 }
 
 .nav-button {
