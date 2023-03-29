@@ -2,7 +2,7 @@
   <h1>AI Photo Album Web App (AWS)</h1>
   <p>
     <a
-      href="http://photo-album-webapp-frontend.s3-website-us-east-1.amazonaws.com/"
+      href="http://photo-album-webapp-frontend.s3-website-us-east-1.amazonaws.com"
       target="_new"
       ><strong>Visit the Live Demo</strong></a
     >
