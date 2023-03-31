@@ -22,4 +22,38 @@
     <li>Perform search using Amazon OpenSearch Service</li>
     <li>Image modal for larger previews and navigation between images</li>
   </ul>
+  <h2>AWS Services</h2>
+  <ul>
+    <li>Rekognition</li>
+    <li>Lex</li>
+    <li>API Gateway</li>
+    <li>Lambda</li>
+    <li>S3</li>
+    <li>OpenSearch Service</li>
+    <li>CodePipeline</li>
+    <li>CloudFormation</li>
+  </ul>
+  <h2>Architecture</h2>
+  <p>
+    <img src="./screenshots/architecture.png" alt="Architecture Diagram" />
+  </p>
+  <h2>Screenshots</h2>
+  <p>
+    <img src="./screenshots/home.png" alt="Home Page" />
+  </p>
+  <p>
+    <img src="./screenshots/upload.png" alt="Upload Page" />
+  </p>
+  <p>
+    <img src="./screenshots/search.png" alt="Search Page" />
+  </p>
+  <p>
+    <img src="./screenshots/modal.png" alt="Modal Page" />
+  </p>
+  <p>
+    <img src="./screenshots/results1.png" alt="Results Page 1" />
+  </p>
+  <p>
+    <img src="./screenshots/results2.png" alt="Results Page 2" />
+  </p>
 </div>

@@ -1,0 +1,38 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+  pre_build:
+    commands:
+      - echo "Installing dependencies..."
+      - npm install -g pluralize
+      - npm install @opensearch-project/opensearch
+  build:
+    commands:
+      - echo "Building Lambda functions..."
+      - cd LF1
+      - npm init -y
+      - npm install @opensearch-project/opensearch
+      - cd ..
+      - cd LF2
+      - npm init -y
+      - npm install pluralize
+      - npm install @opensearch-project/opensearch
+      - cd ..
+  post_build:
+    commands:
+      - echo "Packaging Lambda functions..."
+      - cd LF1
+      - zip -r ../LF1.zip *
+      - cd ..
+      - cd LF2
+      - zip -r ../LF2.zip *
+      - cd ..
+
+artifacts:
+  files:
+    - LF1.zip
+    - LF2.zip
+  discard-paths: yes
