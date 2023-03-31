@@ -35,7 +35,7 @@
   </ul>
   <h2>Architecture</h2>
   <p>
-    <img src="./screenshots/architecture.png" alt="Architecture Diagram" />
+    <img src="./screenshots/Architecture.png" alt="AWS Architecture Diagram" />
   </p>
   <h2>Screenshots</h2>
   <p>
